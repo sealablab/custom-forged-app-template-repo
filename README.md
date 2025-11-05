@@ -33,15 +33,28 @@ This is a **template repository** for building custom instrument firmware on the
 **Step 1: Create from Template**
 ```bash
 # Click "Use this template" button on GitHub to create your repository
-# Then clone YOUR new repository:
+# Then clone YOUR new repository WITH SUBMODULES:
 git clone --recurse-submodules https://github.com/YOUR-USERNAME/your-moku-project.git
 cd your-moku-project
+
+# If you forgot --recurse-submodules, initialize them now:
+git submodule update --init --recursive
 
 # Install dependencies
 uv sync
 
-# Verify setup
+# Verify setup works
 python -c "from moku_models import MOKU_GO_PLATFORM; print('✅ Template ready!')"
+python -c "from riscure_models import DS1120A_PLATFORM; print('✅ Imports working!')"
+
+# If imports fail, manually install workspace members:
+# uv pip install -e libs/moku-models/ -e libs/riscure-models/
+```
+
+**⚠️ Common Issue:** If you see `ModuleNotFoundError`, you likely forgot to initialize submodules. Run:
+```bash
+git submodule update --init --recursive
+uv pip install -e libs/moku-models/ -e libs/riscure-models/
 ```
 
 **Step 2: Customize for Your Probes**

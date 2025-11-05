@@ -4,6 +4,42 @@ Guide the user through customizing this Moku instrument development template for
 
 ---
 
+## ⚠️ PRE-FLIGHT CHECK (Run This First!)
+
+**CRITICAL:** Before customizing, verify the monorepo is properly initialized.
+
+**Common issue:** Users clone the repo but forget to initialize git submodules, resulting in empty submodule directories and import errors.
+
+**Check and fix automatically:**
+
+```bash
+# 1. Check if submodules are initialized
+git submodule status --recursive
+
+# If output shows lines starting with '-' (uninitalized), fix it:
+git submodule update --init --recursive
+
+# 2. Verify workspace dependencies are installed
+uv sync
+
+# 3. Test that core libraries can be imported
+python -c "from moku_models import MOKU_GO_PLATFORM; print('✓ moku_models works')"
+python -c "from riscure_models import DS1120A_PLATFORM; print('✓ riscure_models works')"
+```
+
+**Expected output:**
+- Submodule status shows commit hashes (not `-` prefix)
+- Both import tests print ✓ messages
+- No `ModuleNotFoundError` exceptions
+
+**If imports fail after running above commands:**
+- Manually install workspace members: `uv pip install -e libs/moku-models/ -e libs/riscure-models/`
+- This ensures packages are available even if workspace mode has issues
+
+**Only proceed with customization after this check passes!**
+
+---
+
 ## 🎯 KEY INSIGHT (Read This First!)
 
 **THIS IS A MOKU PLATFORM TEMPLATE, NOT A GENERIC FPGA TEMPLATE!**
