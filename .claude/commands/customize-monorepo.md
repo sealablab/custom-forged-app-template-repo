@@ -1,117 +1,204 @@
 # Customize Monorepo
 
-Guide the user through customizing this template monorepo for their specific use case.
+Guide the user through customizing this Moku instrument development template for their specific probe integration needs.
+
+---
+
+## 🎯 KEY INSIGHT (Read This First!)
+
+**THIS IS A MOKU PLATFORM TEMPLATE, NOT A GENERIC FPGA TEMPLATE!**
+
+**What users are actually doing:**
+- Adding support **TO** the Moku platform **FOR** their specific probes
+- Moku (via moku-models) is the **foundation**, not optional
+- Riscure models are an **example** of probe integration
+- Main customization: **Adding THEIR probe models** (laser, RF, etc.)
+
+**What users are NOT doing:**
+- ❌ Replacing Moku with different platform (Red Pitaya, PicoScope, etc.)
+- ❌ Using this for non-Moku FPGA development
+- ❌ Removing moku-models to "simplify" the template
+
+**If someone asks about non-Moku platforms:** This template is Moku-specific. They should fork and heavily modify, or use a different template.
 
 ---
 
 ## Your Role
 
-You are helping someone adapt this **composable monorepo template** for their domain-specific needs. This template provides a clean architecture with reusable submodules for embedded instrument development.
+You are helping someone adapt this **Moku + Probe development template** for their specific hardware probes.
+
+**Template purpose:**
+- ✅ **Moku platform** (Go/Lab/Pro/Delta) - This is the CORE foundation
+- ✅ **Adding probe support** to Moku (Riscure EMFI, laser probes, RF analyzers, etc.)
+- ✅ **FPGA/VHDL development** for custom Moku instrument firmware
 
 **Template components:**
-- `tools/forge-codegen/` - YAML → VHDL code generator
-- `libs/forge-vhdl/` - Reusable VHDL components
-- `libs/moku-models/` - Moku platform specifications
-- `libs/riscure-models/` - Riscure probe specifications
+- `libs/moku-models/` - **CORE** - Moku platform specifications (Go/Lab/Pro/Delta)
+- `libs/riscure-models/` - Example probe specs (Riscure DS1120A EMFI probe)
+- `tools/forge-codegen/` - YAML → VHDL code generator (23-type system)
+- `libs/forge-vhdl/` - Reusable VHDL components (voltage utilities, clock dividers)
 - `.claude/` - AI agent configurations
+
+---
+
+## Typical Customization Flow
+
+```
+Template (as cloned)          Customized for User's Probes
+━━━━━━━━━━━━━━━━━━━          ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+libs/moku-models/      ───►   libs/moku-models/         (KEEP - Core!)
+libs/riscure-models/   ───►   libs/riscure-models/      (KEEP as reference)
+                       ───►   libs/laser-models/        (ADD - Their probes!)
+                       ───►   libs/rf-models/           (ADD - If needed)
+tools/forge-codegen/   ───►   tools/forge-codegen/      (KEEP - VHDL gen)
+libs/forge-vhdl/       ───►   libs/forge-vhdl/          (KEEP - VHDL utils)
+```
+
+**Most common pattern:** Keep everything + Add their probe models
 
 ---
 
 ## Customization Workflow
 
-### Step 1: Understand Their Use Case
+### Step 1: Understand Their Probe Integration Needs
 
-Ask clarifying questions:
+Ask targeted questions:
 
 **Questions to ask:**
-1. What are you building? (e.g., "Custom FPGA instrumentation for XYZ platform")
-2. What hardware platform are you targeting? (e.g., Moku, Red Pitaya, custom FPGA)
-3. What code generation do you need? (VHDL? Verilog? Python? None?)
-4. What probes/peripherals do you need to model? (e.g., laser probes, RF analyzers)
-5. What components from this template are relevant to your project?
+1. **What probe(s) are you integrating with Moku?** (e.g., "Riscure EMFI", "Custom laser probe", "RF analyzer")
+2. **Are you doing VHDL/FPGA development?** (Yes = keep codegen tools, No = Python-only)
+3. **Do you want to keep Riscure models as reference?** (Even if using different probes, it's a good example)
 
-**Listen carefully** - Don't assume they want everything in the template.
+**Default assumptions:**
+- ✅ They ARE using Moku platform (that's the whole point!)
+- ✅ They ARE adding probe support (customization is about WHICH probes)
+- ✅ They likely want VHDL tools (this is FPGA development)
+
+**Listen carefully** - Understand their probe hardware, not whether they want Moku.
 
 ---
 
 ### Step 2: Determine What to Keep
 
-Based on their answers, recommend what to **keep**:
+Based on their probe integration needs, recommend what to **keep**:
 
-**If they're using Moku platform:**
-- ✅ Keep `libs/moku-models/`
-- ✅ Keep `libs/forge-vhdl/` (generic VHDL utilities)
-- ✅ Keep `tools/forge-codegen/` (if they need code generation)
+**ALWAYS KEEP (Core for Moku development):**
+- ✅ `libs/moku-models/` - **Required** - Platform specifications (this is the foundation!)
 
-**If they're using different platform:**
-- ❌ Remove `libs/moku-models/`
-- ✅ Keep `libs/forge-vhdl/` (still useful for VHDL work)
-- ✅ Keep `tools/forge-codegen/` (platform-agnostic)
+**USUALLY KEEP (VHDL/FPGA development tools):**
+- ✅ `tools/forge-codegen/` - YAML → VHDL code generator with 23-type system
+- ✅ `libs/forge-vhdl/` - Reusable VHDL components (voltage conversion, clock dividers)
 
-**If they don't need VHDL:**
-- ❌ Remove `libs/forge-vhdl/`
+**DEPENDS ON PROBE TYPE:**
+
+**If using Riscure EMFI probes:**
+- ✅ Keep `libs/riscure-models/` (DS1120A/DS1140A specifications)
+
+**If using OTHER probes (laser, RF, etc.):**
+- ⚠️ **Option A (Recommended):** Keep `libs/riscure-models/` as reference example
+  - Shows how to structure probe specifications
+  - Example of voltage safety validation
+  - Good template for creating their own probe models
+- ⚠️ **Option B:** Remove `libs/riscure-models/` if they want minimal template
+  - Only if they're confident in Pydantic modeling
+  - They'll need to create probe models from scratch
+
+**RARE: Python-only workflow (no VHDL/FPGA):**
 - ❌ Remove `tools/forge-codegen/`
-- ✅ Keep just the Python model libraries
-
-**If they're using Riscure probes:**
-- ✅ Keep `libs/riscure-models/`
-
-**If not using Riscure:**
-- ❌ Remove `libs/riscure-models/`
+- ❌ Remove `libs/forge-vhdl/`
+- ✅ Keep `libs/moku-models/` + probe models
+- **Note:** This is unusual - most Moku custom instrument work involves FPGA!
 
 ---
 
-### Step 3: Identify What to Remove
+### Step 3: Remove Unnecessary Components (If Needed)
 
-Guide them through removing unnecessary submodules:
+**Most common removal:** `libs/riscure-models/` (if using different probes and want minimal template)
 
-**For each submodule they don't need:**
+**Guide them through removal:**
 
 ```bash
-# Remove submodule
-git rm libs/unwanted-module/
+# Remove riscure-models submodule
+git rm libs/riscure-models/
+
+# Update pyproject.toml workspace members
+# Remove: "libs/riscure-models",
 
 # Update documentation
 # - Remove from llms.txt
-# - Remove from CLAUDE.md
+# - Remove from CLAUDE.md "Current Architecture" section
 # - Remove from .claude/manifest.json
 
-git commit -m "chore: Remove unwanted-module (not needed for our use case)"
+# Sync workspace
+uv sync
+
+# Commit changes
+git commit -m "chore: Remove riscure-models (using custom laser probes instead)"
 ```
 
-**Explain why it's safe:**
-- Submodules are independent
-- Removing one doesn't break others
-- They can always re-add later
+**IMPORTANT: Don't remove these unless you know what you're doing:**
+- ⛔ `libs/moku-models/` - This is the CORE! Without it, you're not developing for Moku
+- ⚠️ `tools/forge-codegen/` - Only remove if doing pure Python work (no VHDL)
+- ⚠️ `libs/forge-vhdl/` - Only remove if doing pure Python work (no VHDL)
+
+**Reassure them:**
+- Removing riscure-models is safe and common (if not using Riscure hardware)
+- Submodules are independent - removing one doesn't break others
+- They can always re-add later with `git submodule add`
+- **Recommendation:** Keep it as reference even if not using Riscure probes
 
 ---
 
-### Step 4: Identify What to Add
+### Step 4: Add Their Custom Probe Models (MAIN CUSTOMIZATION)
 
-Based on their use case, suggest new submodules they should create:
+**This is the key customization step!** Help them create probe specifications for their hardware.
 
-**Examples:**
+**If using custom/different probes, guide them to create new probe models:**
 
-**New platform models:**
+**Example: Adding laser probe support**
+
 ```bash
-# Create new repo for their platform
-git submodule add https://github.com/user/redpitaya-models.git libs/redpitaya-models/
-```
+# 1. Create new standalone repo for their probe specs
+# (Guide them through creating laser-models repository)
 
-**New probe models:**
-```bash
+# 2. Add as git submodule
 git submodule add https://github.com/user/laser-models.git libs/laser-models/
+
+# 3. Update pyproject.toml workspace members
+# Add: "libs/laser-models",
+
+# 4. Sync workspace
+uv sync
+
+# 5. Update documentation
+# - Add to llms.txt catalog
+# - Add section to CLAUDE.md
+# - Add entry to .claude/manifest.json
+
+# 6. Commit
+git add .gitmodules libs/laser-models/ pyproject.toml llms.txt CLAUDE.md
+git commit -m "feat: Add laser-models for optical probe support"
 ```
 
-**Custom tools:**
-```bash
-git submodule add https://github.com/user/custom-codegen.git tools/custom-codegen/
-```
+**Probe model structure (guide them):**
 
-**Guide them to:**
-1. Create standalone repo with 3-tier docs (llms.txt → CLAUDE.md → source)
-2. Add as submodule
-3. Update root documentation
+Create standalone repo with:
+- **Pydantic models** defining probe electrical specifications
+- **Voltage safety validation** (following riscure-models pattern)
+- **3-tier documentation** (llms.txt → CLAUDE.md → source)
+- **Port/interface definitions** (inputs, outputs, control signals)
+
+**Point them to riscure-models as template:**
+- Good example structure: `libs/riscure-models/`
+- Shows voltage range validation
+- Shows port specification patterns
+- Has comprehensive documentation
+
+**Other additions (less common):**
+- **Additional Moku platforms** (if using unreleased/custom Moku hardware)
+- **Custom VHDL components** (domain-specific beyond forge-vhdl utilities)
+- **Custom code generators** (if extending beyond forge-codegen)
 
 ---
 
@@ -216,34 +303,58 @@ pytest
 
 ## Common Customization Scenarios
 
-### Scenario 1: "I'm using Moku but different probes"
+### Scenario 1: "I'm using Moku + Riscure EMFI probes" (Template as-is)
 
 **Actions:**
-- Keep `libs/moku-models/`
-- Remove `libs/riscure-models/`
-- Guide them to create `libs/their-probe-models/`
+- ✅ Keep everything as-is
+- ✅ No customization needed!
+- ✅ Just clone and start developing
 
-### Scenario 2: "I'm using different hardware platform entirely"
+**This is the reference implementation - perfect starting point.**
 
-**Actions:**
-- Remove `libs/moku-models/`
-- Keep `libs/forge-vhdl/` (generic VHDL still useful)
-- Guide them to create `libs/their-platform-models/`
-
-### Scenario 3: "I only need the Pydantic models, no VHDL"
+### Scenario 2: "I'm using Moku + Custom Laser Probes" (MOST COMMON)
 
 **Actions:**
-- Remove `tools/forge-codegen/`
-- Remove `libs/forge-vhdl/`
-- Keep just model libraries
-- Simplify `.claude/` commands
+- ✅ Keep `libs/moku-models/` (CORE)
+- ✅ Keep `tools/forge-codegen/` + `libs/forge-vhdl/` (VHDL development)
+- ⚠️ Keep `libs/riscure-models/` as reference (recommended)
+- ➕ Create `libs/laser-models/` (new probe specs)
+- 📝 Update documentation to reflect laser probe integration
 
-### Scenario 4: "I need everything but with customizations"
+**This is the typical use case - adding NEW probe support to Moku.**
+
+### Scenario 3: "I'm using Moku + Multiple Probe Types"
 
 **Actions:**
-- Keep all submodules
-- Guide them to fork the ones they want to customize
-- Show them how to maintain sync with upstream
+- ✅ Keep `libs/moku-models/` (CORE)
+- ✅ Keep `libs/riscure-models/` (if using Riscure)
+- ➕ Add `libs/laser-models/` (if using laser)
+- ➕ Add `libs/rf-models/` (if using RF analyzer)
+- ✅ Keep all VHDL tools
+- 📝 Create integration patterns in CLAUDE.md for multi-probe setups
+
+**Multiple probe support - all probes coexist in libs/.**
+
+### Scenario 4: "I only need Python models, no VHDL/FPGA work" (RARE)
+
+**Actions:**
+- ✅ Keep `libs/moku-models/` (CORE)
+- ✅ Keep probe models (riscure or custom)
+- ❌ Remove `tools/forge-codegen/`
+- ❌ Remove `libs/forge-vhdl/`
+- 📝 Update docs to reflect Python-only usage
+
+**Unusual scenario - most Moku custom instrument work involves FPGA!**
+
+### Scenario 5: "I want to extend/customize Moku platform models"
+
+**Actions:**
+- 🔀 Fork `libs/moku-models/` to your own repo
+- 📝 Update `.gitmodules` to point to your fork
+- ➕ Add custom platform definitions
+- 🔁 Consider contributing back useful additions via PR
+
+**For adding custom/unreleased Moku platforms or extending existing specs.**
 
 ---
 
@@ -305,28 +416,80 @@ Suggest they:
 
 ## Example Dialogue
 
-**User:** "I want to use this for Red Pitaya development with laser probes"
+### Example 1: User with Different Probe Type
+
+**User:** "I want to use this for Moku development with custom laser probes"
 
 **You:**
 ```
-Great! Let me help you customize this template for Red Pitaya + lasers.
+Perfect! This template is designed exactly for Moku + probe integration.
 
-Based on your needs:
+Based on your laser probe needs:
+
+KEEP (Core Moku development):
+- ✅ libs/moku-models/ - Platform specs (Go/Lab/Pro/Delta)
+- ✅ tools/forge-codegen/ - YAML → VHDL code generator
+- ✅ libs/forge-vhdl/ - VHDL components (voltage utilities, etc.)
+
+KEEP AS REFERENCE (Recommended):
+- ⚠️ libs/riscure-models/ - Good example for structuring YOUR laser probe models
+  Shows voltage safety validation, port specifications, 3-tier docs
+
+ADD (New probe support):
+- ➕ libs/laser-models/ - You'll create this for your laser probe specs
+  Use riscure-models as a template for structure
+
+OPTIONAL REMOVAL:
+- You CAN remove riscure-models if you want minimal template
+- But I recommend keeping it as reference!
+
+Should I guide you through creating your laser-models submodule?
+```
+
+### Example 2: User Wants to Use Template As-Is
+
+**User:** "I'm using Moku Go with Riscure DS1120A EMFI probe"
+
+**You:**
+```
+Excellent! You don't need ANY customization - this template is already configured
+for exactly your use case (Moku + Riscure EMFI).
+
+Quick start:
+1. git clone --recurse-submodules <your-repo>
+2. uv sync
+3. Start developing!
+
+All components are ready:
+- ✅ libs/moku-models/ - Has Moku Go specs
+- ✅ libs/riscure-models/ - Has DS1120A probe specs
+- ✅ tools/forge-codegen/ - Ready for YAML → VHDL generation
+- ✅ libs/forge-vhdl/ - VHDL utilities available
+
+Want me to show you the integration patterns (Moku + Riscure safety validation)?
+```
+
+### Example 3: Edge Case - Python Only
+
+**User:** "I just need Python models for Moku platform and probe specs, no VHDL"
+
+**You:**
+```
+Got it - Python-only workflow (unusual for Moku, but valid).
 
 KEEP:
-- libs/forge-vhdl/ (VHDL components are generic, still useful)
-- tools/forge-codegen/ (code generation is platform-agnostic)
-- .claude/ structure (AI agents helpful for any platform)
+- ✅ libs/moku-models/ - Platform specifications
+- ✅ libs/riscure-models/ - Probe specifications (or your custom probe models)
 
-REMOVE:
-- libs/moku-models/ (you're using Red Pitaya, not Moku)
-- libs/riscure-models/ (you're using lasers, not Riscure EM probes)
+REMOVE (VHDL tools not needed):
+- ❌ tools/forge-codegen/ - VHDL code generator
+- ❌ libs/forge-vhdl/ - VHDL components
 
-ADD (you'll need to create):
-- libs/redpitaya-models/ (new submodule for Red Pitaya specs)
-- libs/laser-models/ (new submodule for laser probe specs)
+NOTE: Most Moku custom instrument development involves FPGA/VHDL work.
+Are you sure you won't need code generation? If you change your mind later,
+you can always add these back!
 
-Should I guide you through removing the unnecessary submodules first?
+Should I guide you through removing the VHDL tools?
 ```
 
 ---

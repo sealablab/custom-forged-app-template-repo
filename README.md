@@ -1,15 +1,23 @@
-# moku-instrument-forge-mono-repo
+# Moku Instrument Forge - Monorepo Template
 
-**Composable Monorepo Template for Embedded Instrument Development**
+**Composable Development Template for Moku Platform + Probe Integration**
 
-This is a **template repository** demonstrating a clean, AI-navigable architecture for building embedded instrument development environments using git submodules with integrated 3-tier documentation.
+This is a **template repository** for building custom instrument firmware on the **Moku platform** (Go/Lab/Pro/Delta) with integrated probe support. Features git submodule architecture, FPGA/VHDL code generation, and AI-navigable 3-tier documentation.
 
-**Use this template for:**
-- Starting your own instrument development monorepo
-- Learning composable git submodule patterns
-- Building AI-assisted development workflows
+---
 
-**Current Example:** Moku custom EMFI probe drivers using the forge framework
+## 🎯 What This Template Is For
+
+**Primary use case:** Adding custom probe support to Moku platforms
+
+- ✅ **Moku platform development** (Go/Lab/Pro/Delta FPGA instruments)
+- ✅ **Probe integration** (EMFI, laser, RF, or custom hardware probes)
+- ✅ **VHDL/FPGA code generation** (YAML → VHDL with 23-type system)
+- ✅ **Platform + probe safety validation** (voltage compatibility checking)
+
+**Reference implementation:** Moku + Riscure DS1120A EMFI probe
+
+**NOT for:** Non-Moku FPGA platforms (Red Pitaya, PicoScope, etc.) - This template is Moku-specific.
 
 **Status:** Template-Ready ✅
 **Version:** `v2.0.0` (2025-11-04)
@@ -22,78 +30,117 @@ This is a **template repository** demonstrating a clean, AI-navigable architectu
 
 ### Quick Start
 
-**Option 1: GitHub Template** (Recommended)
+**Step 1: Create from Template**
 ```bash
-# 1. Click "Use this template" button on GitHub
-# 2. Clone your new repository
-git clone --recurse-submodules <your-repo-url>
-cd your-repo
+# Click "Use this template" button on GitHub to create your repository
+# Then clone YOUR new repository:
+git clone --recurse-submodules https://github.com/YOUR-USERNAME/your-moku-project.git
+cd your-moku-project
 
-# 3. Customize for your needs
-# See TEMPLATE.md for step-by-step guide
+# Install dependencies
+uv sync
+
+# Verify setup
+python -c "from moku_models import MOKU_GO_PLATFORM; print('✅ Template ready!')"
 ```
 
-**Option 2: Direct Clone**
-```bash
-git clone --recurse-submodules https://github.com/sealablab/moku-instrument-forge-mono-repo.git
-cd moku-instrument-forge-mono-repo
-# Then customize as needed
+**Step 2: Customize for Your Probes**
+
+Run the customization command in Claude Code:
+```
+/customize-monorepo
 ```
 
-### Customization
-
-**For AI Assistance:**
-- Run `/customize-monorepo` command in Claude Code
-- AI will guide you through adapting the template
-
-**Manual Customization:**
-- See **[TEMPLATE.md](TEMPLATE.md)** for step-by-step guide
-- See **[CLAUDE.md](CLAUDE.md)** for complete architecture documentation
-- See **[.claude/manifest.json](.claude/manifest.json)** for programmatic structure
-
-**Common Scenarios:**
-- Different platform? Remove `libs/moku-models/`, add your platform models
-- Different probes? Remove `libs/riscure-models/`, add your probe specs
-- No VHDL? Remove `libs/forge-vhdl/` and `tools/forge-codegen/`
-- Just models? Keep only `libs/*-models/`
+Or follow the manual guide: **[CLAUDE.md](CLAUDE.md)**
 
 ---
 
-## Monorepo Structure
+## 📝 Customization Overview
 
-This repository uses git submodules organized in a flat, clean hierarchy:
+### Most Common: Adding Your Probe Models
 
-### Tools
+**Typical workflow:**
+1. ✅ **Keep** `libs/moku-models/` (core platform - required!)
+2. ✅ **Keep** `libs/riscure-models/` (reference example - recommended)
+3. ✅ **Keep** VHDL tools (`tools/forge-codegen/`, `libs/forge-vhdl/`)
+4. ➕ **Add** `libs/YOUR-probe-models/` (your custom probe specs)
+5. 📝 **Update** documentation to reflect your probes
 
-#### [moku-instrument-forge-codegen](https://github.com/sealablab/moku-instrument-forge-codegen)
-> **Location:** `tools/forge-codegen/`
-> **Purpose:** YAML → VHDL code generator with type-safe register serialization
+**Example: Adding laser probe support**
+```bash
+# Create your probe models repository (use riscure-models as template)
+git submodule add https://github.com/YOUR-USERNAME/laser-models.git libs/laser-models/
+# Update pyproject.toml workspace members
+# Update documentation
+uv sync
+```
 
-**NEW!** Fresh, self-contained code generator with flattened `basic_serialized_datatypes` (internal serialization engine).
+### Less Common Scenarios
 
-### Foundational Libraries
+**Python-only (no VHDL/FPGA):**
+- Keep: `libs/moku-models/` + your probe models
+- Remove: `tools/forge-codegen/`, `libs/forge-vhdl/`
+- Note: Unusual for Moku development (most work involves FPGA)
 
-#### [moku-instrument-forge-vhdl](https://github.com/sealablab/moku-instrument-forge-vhdl)
-> **Location:** `libs/forge-vhdl/`
-> **Purpose:** Reusable VHDL components
+**Extending Moku platform models:**
+- Fork `libs/moku-models/` to add custom platforms
+- Update `.gitmodules` to point to your fork
 
-Provides common VHDL utilities:
-- **packages/** - Common types, voltage utilities, LUTs
-- **debugging/** - FSM observer for hardware debugging
-- **loader/** - BRAM initialization utilities
-- **utilities/** - Clock dividers, triggers, helpers
+### Detailed Guides
 
-#### [moku-models](https://github.com/sealablab/moku-models)
-> **Location:** `libs/moku-models/`
-> **Purpose:** Moku platform specifications (Go/Lab/Pro/Delta)
+- **AI-Assisted:** Run `/customize-monorepo` in Claude Code
+- **Complete Architecture:** [CLAUDE.md](CLAUDE.md)
+- **Programmatic Structure:** [.claude/manifest.json](.claude/manifest.json)
 
-Pydantic models for platform specs, deployment configs, signal routing.
+---
 
-#### [riscure-models](https://github.com/sealablab/riscure-models)
-> **Location:** `libs/riscure-models/`
-> **Purpose:** Riscure probe hardware specifications (DS1120A/DS1140A)
+## Template Structure
 
-Pydantic models for probe specs, voltage safety validation.
+This template uses git submodules organized in a flat, clean hierarchy:
+
+### Core Components
+
+#### `libs/moku-models/` - **Platform Specifications (REQUIRED)**
+> Pydantic models for Moku platforms: Go, Lab, Pro, Delta
+>
+> **Purpose:** Hardware specs, deployment configs, signal routing
+> **Status:** ✅ Production-ready - All 4 platforms supported
+> **Docs:** [llms.txt](libs/moku-models/llms.txt) | [CLAUDE.md](libs/moku-models/CLAUDE.md)
+
+This is the **foundation** - required for all Moku development.
+
+#### `libs/riscure-models/` - **Example Probe Specifications**
+> Pydantic models for Riscure EMFI probes: DS1120A, DS1140A
+>
+> **Purpose:** Reference implementation for probe integration
+> **Use as:** Template for creating your own probe models
+> **Docs:** [llms.txt](libs/riscure-models/llms.txt) | [CLAUDE.md](libs/riscure-models/CLAUDE.md)
+
+Shows voltage safety validation, port specifications, and documentation patterns.
+
+### VHDL Development Tools
+
+#### `tools/forge-codegen/` - **Code Generator**
+> YAML → VHDL code generator with 23-type system and register packing
+>
+> **Purpose:** Generate type-safe VHDL from high-level specifications
+> **Status:** ✅ Production-ready - 69 tests passing
+> **Docs:** [llms.txt](tools/forge-codegen/llms.txt) | [CLAUDE.md](tools/forge-codegen/CLAUDE.md)
+
+#### `libs/forge-vhdl/` - **VHDL Component Library**
+> Reusable VHDL utilities: voltage conversion, clock dividers, FSM observer
+>
+> **Purpose:** Common VHDL building blocks for instrument firmware
+> **Status:** ✅ Production-ready - CocoTB tested
+> **Docs:** [llms.txt](libs/forge-vhdl/llms.txt) | [CLAUDE.md](libs/forge-vhdl/CLAUDE.md)
+
+### AI Agent System
+
+#### `.claude/` - **AI Development Assistance**
+> Slash commands and agents for monorepo orchestration
+>
+> **Key command:** `/customize-monorepo` - Interactive template customization
+> **Agents:** Deployment orchestration, hardware debugging
 
 ---
 
@@ -167,66 +214,75 @@ Expected output:
 
 ### Setup Python Environment
 
-This monorepo uses **uv workspace mode** - the root is a pure workspace container (no package built at root level).
+This template uses **uv workspace mode** - the root is a pure workspace container.
 
 ```bash
-# Install dependencies (workspace mode)
+# Install dependencies
 uv sync
 
 # Verify imports work
-python scripts/setup_forge_path.py  # Verify forge imports
+python -c "from moku_models import MOKU_GO_PLATFORM; print('✅ Setup complete')"
 
 # Run tests across all workspace members
 pytest
 ```
 
-**How workspace mode works:**
-- Root `pyproject.toml` declares workspace members (submodules)
+**About workspace mode:**
+- Root `pyproject.toml` declares workspace members (your submodules)
 - No build system at root - each submodule has its own
 - Shared dependencies defined at root, available to all members
 - Cross-submodule imports work seamlessly
+- When you add/remove submodules, update `[tool.uv.workspace]` members list
 
 ---
 
 ## Documentation
 
-Each submodule follows a **3-tier documentation system**:
+Each submodule follows a **3-tier documentation system** optimized for AI navigation:
 
-| Repository | Purpose | Quick Ref | Full Guide |
-|------------|---------|-----------|------------|
-| [forge-codegen](https://github.com/sealablab/moku-instrument-forge-codegen) | YAML → VHDL generator | [llms.txt](tools/forge-codegen/llms.txt) | [CLAUDE.md](tools/forge-codegen/CLAUDE.md) |
-| [forge-vhdl](https://github.com/sealablab/moku-instrument-forge-vhdl) | VHDL utilities | [llms.txt](libs/forge-vhdl/llms.txt) | [CLAUDE.md](libs/forge-vhdl/CLAUDE.md) |
-| [moku-models](https://github.com/sealablab/moku-models) | Platform specs | [llms.txt](libs/moku-models/llms.txt) | [CLAUDE.md](libs/moku-models/CLAUDE.md) |
-| [riscure-models](https://github.com/sealablab/riscure-models) | Probe specs | [llms.txt](libs/riscure-models/llms.txt) | [CLAUDE.md](libs/riscure-models/CLAUDE.md) |
+| Component | Purpose | Quick Ref | Full Guide |
+|-----------|---------|-----------|------------|
+| `tools/forge-codegen/` | YAML → VHDL generator | [llms.txt](tools/forge-codegen/llms.txt) | [CLAUDE.md](tools/forge-codegen/CLAUDE.md) |
+| `libs/moku-models/` | Platform specs (CORE) | [llms.txt](libs/moku-models/llms.txt) | [CLAUDE.md](libs/moku-models/CLAUDE.md) |
+| `libs/riscure-models/` | Probe specs (example) | [llms.txt](libs/riscure-models/llms.txt) | [CLAUDE.md](libs/riscure-models/CLAUDE.md) |
+| `libs/forge-vhdl/` | VHDL utilities | [llms.txt](libs/forge-vhdl/llms.txt) | [CLAUDE.md](libs/forge-vhdl/CLAUDE.md) |
 
-**Progressive disclosure:** Start with llms.txt (~500-1000 tokens), escalate to CLAUDE.md (~3-5k tokens) for complete context.
+**Progressive disclosure strategy:**
+- **Tier 1 (llms.txt):** Quick reference (~500-1000 tokens) - Load first
+- **Tier 2 (CLAUDE.md):** Complete guide (~3-5k tokens) - Load when designing
+- **Tier 3 (source code):** Implementation details - Load when coding
+
+**For your custom probe models:** Follow the same pattern! Use `libs/riscure-models/` as a template.
 
 ---
 
-## Architecture Migration (v2.0.0)
+## Architecture
 
-**What changed (2025-11-04):**
+**Version 2.0 - Clean Separation**
 
-1. **Created forge-codegen** - Fresh, self-contained YAML → VHDL generator
-   - Flattened `basic_serialized_datatypes` (no longer separate repo)
-   - Clean package naming: `forge_codegen` (was `forge`)
-   - All imports updated, 69 tests passing
+This template uses a flat, modular architecture:
 
-2. **Lifted foundational libraries** - Moved to top-level `libs/`
-   - `libs/moku-models/` (was `forge/libs/moku-models/`)
-   - `libs/riscure-models/` (was `forge/libs/riscure-models/`)
-   - Now peers with `libs/forge-vhdl/`
+```
+your-moku-project/
+├── tools/              # Code generation tools
+│   └── forge-codegen/  # YAML → VHDL generator
+├── libs/               # Foundational libraries (flat, no nesting)
+│   ├── moku-models/    # Platform specs (REQUIRED)
+│   ├── riscure-models/ # Probe specs (example)
+│   ├── forge-vhdl/     # VHDL utilities
+│   └── YOUR-models/    # Your custom probe models (add here)
+├── .claude/            # AI agents and commands
+├── docs/               # Your project documentation
+└── pyproject.toml      # Workspace configuration
+```
 
-3. **Removed legacy forge/** - Eliminated nested submodule structure
-   - Old `forge/` directory with nested submodules has been removed
-   - Historical probe packages archived elsewhere
-   - Use `tools/forge-codegen/` for all code generation
+**Key principles:**
+- **Clean separation:** tools/ vs libs/ (no nested submodules)
+- **Islands of authority:** Each submodule is authoritative for its domain
+- **Self-contained modules:** Each works standalone, independently versioned
+- **3-tier documentation:** llms.txt → CLAUDE.md → source
 
-**Benefits:**
-- Clean separation (tools vs libraries)
-- No nested submodules
-- Simplified maintenance
-- Better naming (forge_codegen vs ambiguous "forge")
+See [CLAUDE.md](CLAUDE.md) for complete architecture details.
 
 ---
 
@@ -236,23 +292,24 @@ Each submodule follows a **3-tier documentation system**:
 
 ```bash
 # Generate VHDL from YAML spec
-python -m forge_codegen.generator.codegen spec.yaml --output-dir generated/
+python -m forge_codegen.generator.codegen your-spec.yaml --output-dir generated/
+
+# See tools/forge-codegen/ for complete documentation
 ```
 
-See [tools/forge-codegen/](tools/forge-codegen/) for complete documentation.
-
-### Updating Submodules
+### Managing Submodules
 
 ```bash
-# Update a submodule to a specific version
-cd tools/forge-codegen
-git fetch origin
-git checkout <commit-or-tag>
+# Update a submodule to latest version
+cd libs/your-custom-probe-models/
+git pull origin main
 cd ../..
+git add libs/your-custom-probe-models/
+git commit -m "chore: Update probe models"
 
-# Commit the update
-git add tools/forge-codegen
-git commit -m "chore: Update forge-codegen to <version>"
+# Update workspace after adding/removing submodules
+# Edit pyproject.toml [tool.uv.workspace] members, then:
+uv sync
 ```
 
 ### Testing
@@ -268,58 +325,46 @@ Configuration in `pyproject.toml`.
 
 ---
 
-## Submodule Synchronization
+## Architecture Documentation
 
-All submodules are tagged at synchronized states for reproducible builds.
-
-**Current sync point:** `monorepo-init-v1.0.0` (2025-11-03)
-
-### Checkout Synchronized State
-
-```bash
-# Checkout all submodules to the synchronized tag
-git submodule foreach --recursive 'git checkout monorepo-init-v1.0.0 || true'
-```
-
-### Create New Sync Point
-
-When updating multiple submodules, tag the new synchronized state:
-
-```bash
-# In each updated submodule
-cd forge
-git tag -a monorepo-init-v1.1.0 -m "Synchronized for monorepo v1.1.0"
-git push origin monorepo-init-v1.1.0
-cd ..
-
-# Repeat for other submodules...
-```
-
----
-
-## Architecture
-
-See [.claude/shared/ARCHITECTURE_OVERVIEW.md](.claude/shared/ARCHITECTURE_OVERVIEW.md) for complete v2.0 architecture details.
-
-**Key Principles:**
-- Clean separation: tools/ vs libs/ (no nested submodules)
-- Self-contained authoritative modules
-- 3-tier documentation system (llms.txt → CLAUDE.md → source)
-- Git submodules for dependency management
-- CocoTB + pytest for VHDL testing
+- **Complete Guide:** [CLAUDE.md](CLAUDE.md) - Full architecture, integration patterns
+- **AI Navigation:** [llms.txt](llms.txt) - Quick component catalog
+- **Customization:** Run `/customize-monorepo` in Claude Code
+- **Programmatic:** [.claude/manifest.json](.claude/manifest.json) - Machine-readable structure
 
 ---
 
 ## Contributing
 
-1. Make changes in appropriate submodule
-2. Write CocotB tests for VHDL changes
+This is a **template repository**. When you use it:
+
+1. **Create your own repository** from this template (click "Use this template")
+2. **Make it yours** - customize for your specific Moku + probe integration
+3. **Share your improvements** - If you create generally useful patterns, consider:
+   - Documenting them for others
+   - Contributing back enhancements to the template structure
+   - Sharing your custom probe models (if not proprietary)
+
+**For submodule development:**
+1. Make changes in appropriate submodule repository
+2. Write CocoTB tests for VHDL changes
 3. Validate with `pytest`
 4. Commit to submodule, then update monorepo reference
-5. Tag new sync point if multiple submodules updated
+5. Run `uv sync` after workspace changes
 
 ---
 
 ## License
 
 MIT License - See [LICENSE](LICENSE)
+
+---
+
+## Resources
+
+**Template Repository:** Fork this to create your own Moku development environment
+**Documentation:** [CLAUDE.md](CLAUDE.md) - Complete architecture guide
+**AI Assistance:** Run `/customize-monorepo` in Claude Code
+**Issues/Questions:** Use GitHub Issues in your forked repository
+
+**Happy Moku development! 🚀**

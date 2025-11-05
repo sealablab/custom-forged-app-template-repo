@@ -1,10 +1,14 @@
-# moku-instrument-forge-mono-repo
+# Moku Instrument Forge - Monorepo Template
 
-> Hierarchical monorepo for developing Moku custom EMFI probe drivers
+> Template for Moku platform development with custom probe integration
 
 ## What is this?
 
-Monorepo orchestrating composable git submodules for the complete probe development workflow: type system → code generation → VHDL implementation → hardware deployment.
+**Template repository** for building custom FPGA instruments on Moku platforms (Go/Lab/Pro/Delta) with integrated probe support. Uses composable git submodules for: type system → code generation → VHDL implementation → hardware deployment.
+
+**Primary use case:** Adding YOUR custom probe models (laser, RF, etc.) to Moku platform
+
+**Reference implementation:** Moku + Riscure DS1120A EMFI probe
 
 **Key insight:** Tiered documentation with submodule delegation enables focused context loading.
 
@@ -12,25 +16,23 @@ Monorepo orchestrating composable git submodules for the complete probe developm
 
 ## Repository Structure
 
-### Development Tools (git submodules)
+### Core Platform (git submodules)
 
-| Tool | Purpose | Quick Ref |
-|------|---------|-----------|
-| [forge-codegen](tools/forge-codegen/) | YAML → VHDL code generator with type-safe register serialization | [llms.txt](tools/forge-codegen/llms.txt) |
+| Component | Purpose | Quick Ref |
+|-----------|---------|-----------|
+| [moku-models](libs/moku-models/) | **REQUIRED** - Moku platform specifications (Go/Lab/Pro/Delta) | [llms.txt](libs/moku-models/llms.txt) |
+| [riscure-models](libs/riscure-models/) | Example probe specs (DS1120A EMFI) - Use as template | [llms.txt](libs/riscure-models/llms.txt) |
+
+### VHDL Development Tools (git submodules)
+
+| Component | Purpose | Quick Ref |
+|-----------|---------|-----------|
+| [forge-codegen](tools/forge-codegen/) | YAML → VHDL code generator (23-type system) | [llms.txt](tools/forge-codegen/llms.txt) |
+| [forge-vhdl](libs/forge-vhdl/) | Reusable VHDL components + voltage utilities | [llms.txt](libs/forge-vhdl/llms.txt) |
 
 **Internal to forge-codegen:**
 - `basic_serialized_datatypes/` - 23-type system (voltage/time/boolean) with automatic register packing
 - Not a separate library, tightly coupled serialization internals
-
-### Foundational Libraries (git submodules - flat structure)
-
-Authoritative Pydantic model libraries defining core abstractions:
-
-| Library | Purpose | Quick Ref |
-|---------|---------|-----------|
-| [forge-vhdl](libs/forge-vhdl/) | Reusable VHDL components + voltage type system | [llms.txt](libs/forge-vhdl/llms.txt) |
-| [moku-models](libs/moku-models/) | Platform specifications (Go/Lab/Pro/Delta) | [llms.txt](libs/moku-models/llms.txt) |
-| [riscure-models](libs/riscure-models/) | Probe hardware specs (DS1120A, voltage safety) | [llms.txt](libs/riscure-models/llms.txt) |
 
 **Design Philosophy:**
 - forge-vhdl: Practical VHDL utilities (3 voltage domains: 3.3V, 5V, ±5V)
