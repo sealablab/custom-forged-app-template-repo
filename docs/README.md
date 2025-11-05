@@ -8,10 +8,7 @@
 
 ### Project Documentation (`docs/`)
 
-**`migration/`** - Migration plans and tracking for major refactoring efforts
-- Phase-by-phase execution plans (FORGE_VHDL_P*.md, etc.)
-- Design documents (VOLTAGE_TYPE_SYSTEM_DESIGN.md)
-- Status tracking for ongoing work
+**Documentation index and GitHub template setup instructions.**
 
 ---
 
@@ -63,9 +60,6 @@ cat ../../.claude/workflows/submodule-doc-refactor-quick.md
 
 **Understanding the monorepo architecture?**
 → `.claude/shared/ARCHITECTURE_OVERVIEW.md`
-
-**Working on a migration project?**
-→ `docs/migration/`
 
 **Setting up Claude Code workflows?**
 → `.claude/commands/` (slash commands) and `.claude/agents/` (specialized agents)
